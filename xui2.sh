@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# wget -c http://18.139.224.222/xui/install.sh && bash install.sh
+# wget -c https://raw.githubusercontent.com/zyhut200/x-uizz/main/install.sh && bash install.sh
 
 username=admin
 password=admin996
 port=49999
 
 cd ~
-wget -c http://18.139.224.222/xui/x-ui-linux-amd64.tar.gz
-wget -c http://18.139.224.222/xui/tc
-wget -c http://18.139.224.222/xui/tc.sh
+wget -c https://raw.githubusercontent.com/zyhut200/x-uizz/main/x-ui-linux-amd64.tar.gz
+wget -c https://raw.githubusercontent.com/zyhut200/x-uizz/main/tc
+wget -c https://raw.githubusercontent.com/zyhut200/x-uizz/main/tc.sh
 
 tar zxvf x-ui-linux-amd64.tar.gz
 rm -f x-ui-linux-amd64.tar.gz
