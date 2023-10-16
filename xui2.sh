@@ -2,8 +2,6 @@
 
 # wget -c http://18.139.224.222/xui/install.sh && bash install.sh
 
-yum -y install wget 
-
 username=admin
 password=admin996
 port=49999
