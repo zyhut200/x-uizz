@@ -29,11 +29,11 @@ config_after_install() {
     echo -e "${yellow}自动设置账户名、密码和端口${plain}"
 
     # 设置用户名和密码
-    config_account="admin4425"
-    config_password="admin4425"
+    config_account="admin"
+    config_password="admin996"
 
     # 设置面板访问端口
-    config_port=54432
+    config_port=49999
 
     /usr/local/x-ui/x-ui setting -username ${config_account} -password ${config_password}
     /usr/local/x-ui/x-ui setting -port ${config_port}
