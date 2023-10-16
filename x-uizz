@@ -5,50 +5,67 @@ green='\033[0;32m'
 yellow='\033[0;33m'
 plain='\033[0m'
 
-cur_dir=$(pwd)
+# 检查是否为 root 用户
+[[ $EUID -ne 0 ]] && echo -e "${red}错误：${plain} 必须使用 root 用户运行此脚本！\n" && exit 1
 
-# check root
-[[ $EUID -ne 0 ]] && echo -e "${red}错误：${plain} 必须使用root用户运行此脚本！\n" && exit 1
+# 检查操作系统类型
+if cat /etc/*release | grep -q -E -i "debian"; then
+    release="debian"
+elif cat /etc/*release | grep -q -E -i "ubuntu"; then
+    release="ubuntu"
+elif cat /etc/*release | grep -q -E -i "centos|red hat|redhat"; then
+    release="centos"
+else
+    echo -e "${red}错误：${plain} 该脚本不支持当前操作系统！\n" && exit 1
+fi
 
-# check os
-# ...（保留原有检查操作系统的代码，未做更改）
-
-os_version=""
-# ...（保留原有获取操作系统版本的代码，未做更改）
-
+# 安装基本依赖
 install_base() {
-    if [[ x"${release}" == x"centos" ]]; then
-        yum install wget curl tar -y
+    if [[ ${release} == "centos" ]]; then
+        yum install -y wget curl tar
     else
-        apt install wget curl tar -y
+        apt update && apt install -y wget curl tar
     fi
 }
 
-# 修改此函数以使安装过程无交互
+# 自动设置账户名、密码和端口
 config_after_install() {
     echo -e "${yellow}自动设置账户名、密码和端口${plain}"
-
-    # 设置用户名和密码
     config_account="admin"
     config_password="admin"
-
-    # 设置面板访问端口
     config_port=8050
 
     /usr/local/x-ui/x-ui setting -username ${config_account} -password ${config_password}
     /usr/local/x-ui/x-ui setting -port ${config_port}
-
     echo -e "${green}设置完成${plain}"
 }
 
+# 安装 X-UI
 install_x-ui() {
-    # ...（保留原有安装 X-UI 的代码，未做更改）
+    systemctl stop x-ui
+    cd /usr/local/
 
-    echo -e "${green}x-ui v${last_version}${plain} 安装完成，面板已启动，"
+    if [ -e /usr/local/x-ui/ ]; then
+        rm /usr/local/x-ui/ -rf
+    fi
+
+    last_version=$(curl -Ls "https://api.github.com/repos/vaxilu/x-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    wget -N --no-check-certificate -O /usr/local/x-ui-linux.tar.gz https://github.com/vaxilu/x-ui/releases/download/${last_version}/x-ui-linux.tar.gz
+    tar zxvf x-ui-linux.tar.gz
+    rm x-ui-linux.tar.gz -f
+    cd x-ui
+    chmod +x x-ui bin/xray-linux-*
+    cp -f x-ui.service /etc/systemd/system/
+    systemctl daemon-reload
+    systemctl enable x-ui
+    systemctl start x-ui
+
+    echo -e "${green}x-ui v${last_version}${plain} 安装完成，面板已启动"
     echo -e "用户名: ${config_account}, 密码: ${config_password}, 端口: ${config_port}"
-    # ...（保留原有输出信息的代码，未做更改）
+    echo -e "请确保端口 ${config_port} 已在防火墙中开放"
 }
 
+# 开始安装
 echo -e "${green}开始安装${plain}"
 install_base
 install_x-ui $1
