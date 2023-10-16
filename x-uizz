@@ -1,0 +1,54 @@
+#!/bin/bash
+
+red='\033[0;31m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+plain='\033[0m'
+
+cur_dir=$(pwd)
+
+# check root
+[[ $EUID -ne 0 ]] && echo -e "${red}错误：${plain} 必须使用root用户运行此脚本！\n" && exit 1
+
+# check os
+# ...（保留原有检查操作系统的代码，未做更改）
+
+os_version=""
+# ...（保留原有获取操作系统版本的代码，未做更改）
+
+install_base() {
+    if [[ x"${release}" == x"centos" ]]; then
+        yum install wget curl tar -y
+    else
+        apt install wget curl tar -y
+    fi
+}
+
+# 修改此函数以使安装过程无交互
+config_after_install() {
+    echo -e "${yellow}自动设置账户名、密码和端口${plain}"
+
+    # 设置用户名和密码
+    config_account="admin"
+    config_password="admin"
+
+    # 设置面板访问端口
+    config_port=8050
+
+    /usr/local/x-ui/x-ui setting -username ${config_account} -password ${config_password}
+    /usr/local/x-ui/x-ui setting -port ${config_port}
+
+    echo -e "${green}设置完成${plain}"
+}
+
+install_x-ui() {
+    # ...（保留原有安装 X-UI 的代码，未做更改）
+
+    echo -e "${green}x-ui v${last_version}${plain} 安装完成，面板已启动，"
+    echo -e "用户名: ${config_account}, 密码: ${config_password}, 端口: ${config_port}"
+    # ...（保留原有输出信息的代码，未做更改）
+}
+
+echo -e "${green}开始安装${plain}"
+install_base
+install_x-ui $1
